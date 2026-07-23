@@ -1,7 +1,6 @@
 using Show.Domain.Abstractions;
 using Show.Domain.Models;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Show.Domain.Services;
 
