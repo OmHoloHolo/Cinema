@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Show.Api.Configurations;
 using Show.Domain;
 using Show.Infrastructure;
-using Microsoft.Extensions.Configuration;
+using Show.Infrastructure.Persistence.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 var port = builder.Configuration.GetRequiredSection("Port").Get<int>();
@@ -17,6 +18,9 @@ builder.Services
     .AddDomainServices();
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+scope.ServiceProvider.GetRequiredService<MigrationService>().Migrate();
 
 app.UseSwagger();
 app.UseSwaggerUI();
