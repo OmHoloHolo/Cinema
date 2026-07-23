@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Shared.Communication.Dtos;
 using Show.Api.Responses;
 using Show.Domain.Models;
 
@@ -16,9 +17,9 @@ public static class ResponseMapper
                 StartTime: screening.StartTime ))
             .ToList());
     
-    public static SeatsResponse ToResponse(this IEnumerable<Seat> seats) => 
+    public static SeatDto ToResponse(this IEnumerable<Seat> seats) => 
         new (Seats: seats
-            .Select(seat => new SeatsResponse.Seat(
+            .Select(seat => new SeatDto.Seat(
                 Id: seat.Id,
                 Row: seat.Row,
                 Number: seat.Number))

@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="./src/Booking/Booking.csproj" />
   <Project Path="./src/Show/Show.csproj" />
+  <Project Path="./src/Shared/Shared.csproj" />
 </Solution>
