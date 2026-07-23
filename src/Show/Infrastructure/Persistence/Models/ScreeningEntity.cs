@@ -1,6 +1,9 @@
 using System;
-using Show.Domain.Models;
 
 namespace Show.Infrastructure.Persistence.Models;
 
-public record ScreeningEntity(int Id, MovieEntity Movie, RoomEntity Room, DateTime StartTime);
+public record ScreeningEntity(int Id, int MovieId, int RoomId, DateTime StartTime)
+{
+	public MovieEntity Movie { get; set; } = null!;
+	public RoomEntity Room { get; set; } = null!;
+}

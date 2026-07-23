@@ -8,9 +8,9 @@ public class RoomConfiguration : IEntityTypeConfiguration<RoomEntity>
 {
     public void Configure(EntityTypeBuilder<RoomEntity> builder)
     {
-        builder.HasKey(room => room.Id);        
+        builder.HasKey(room => room.Id);
         builder
-            .HasMany<SeatEntity>()
+            .HasMany(room => room.Seats)
             .WithOne()
             .HasForeignKey(seat => seat.RoomId);
     }

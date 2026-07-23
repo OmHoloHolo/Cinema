@@ -9,11 +9,11 @@ public class ScreeningConfiguration : IEntityTypeConfiguration<ScreeningEntity>
     public void Configure(EntityTypeBuilder<ScreeningEntity> builder)
     {
         builder.HasKey(movie => movie.Id);
-        builder.HasOne<MovieEntity>()
+        builder.HasOne(screening => screening.Room)
             .WithMany()
-            .HasForeignKey(screening => screening.Movie.Id);
-        builder.HasOne<RoomEntity>()
+            .HasForeignKey(screening => screening.RoomId);
+        builder.HasOne(screening => screening.Movie)
             .WithMany()
-            .HasForeignKey(screening => screening.Room.Id);
+            .HasForeignKey(screening => screening.MovieId);
     }
 }
