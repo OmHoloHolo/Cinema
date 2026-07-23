@@ -1,13 +1,12 @@
 using Booking.Domain.Models;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Booking.Domain.Abstractions;
 
-public interface IBookingService
+public interface IReservationRepository
 {
-    Task<IReadOnlyList<Seat>> GetAvailableSeats(int screeningId);
+    IReadOnlyList<Reservation> GetReservations(int screeningId);
     int? CreateReservation(int screeningId, int seatId);
-    Task<int?> CreateReservation(int screeningId);
     bool CancelReservation(int reservationId);
+    IReadOnlyList<Seat> GetReservedSeats(int screeningId);
 }
