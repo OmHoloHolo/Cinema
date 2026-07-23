@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Booking.Domain.Abstractions;
 using Booking.Domain.Models;
+using Booking.Infrastructure.Persistence.Mappers;
 using Booking.Infrastructure.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,14 +18,14 @@ public class ReservationRepository(BookingDbContext dbContext) : IReservationRep
         return deletedRow > 0;
     }
 
-    public int? CreateReservation(int screeningId, int seatId)
+    public Reservation? CreateReservation(int screeningId, int seatId)
     {
         var reservationEntity = new ReservationEntity(ScreeningId: screeningId, SeatId: seatId);
         dbContext.Reservations.Add(reservationEntity);
         try
         {
             dbContext.SaveChanges();
-            return reservationEntity.Id;
+            return reservationEntity.ToDomain();
         }
         catch (DbUpdateException)
         {
@@ -32,7 +33,7 @@ public class ReservationRepository(BookingDbContext dbContext) : IReservationRep
         }
     }
 
-    public IReadOnlyList<int>? CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests)
+    public IReadOnlyList<Reservation>? CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests)
     {
         var reservationEntities = reservationRequests
             .Select(reservationRequest => new ReservationEntity(ScreeningId: reservationRequest.ScreeningId, SeatId: reservationRequest.SeatId));
@@ -40,7 +41,9 @@ public class ReservationRepository(BookingDbContext dbContext) : IReservationRep
         try
         {
             dbContext.SaveChanges();
-            return reservationEntities.Select(reservationEntity => reservationEntity.Id).ToList();
+            return reservationEntities
+                .Select(reservationEntity => reservationEntity.ToDomain())
+                .ToList();
         }
         catch (DbUpdateException)
         {

@@ -12,10 +12,10 @@ public class BookingService(IReservationRepository reservationRepository, IShowP
     public bool CancelReservation(int reservationId) =>
         reservationRepository.CancelReservation(reservationId);
 
-    public int? CreateReservation(int screeningId, int seatId) =>
+    public Reservation? CreateReservation(int screeningId, int seatId) =>
         reservationRepository.CreateReservation(screeningId, seatId); 
 
-    public async Task<int?> CreateReservation(int screeningId)
+    public async Task<Reservation?> CreateReservation(int screeningId)
     {
         var allSeats = await showProvider.GetSeats(screeningId);
         var reservedSeatIds = reservationRepository
@@ -28,7 +28,7 @@ public class BookingService(IReservationRepository reservationRepository, IShowP
             : reservationRepository.CreateReservation(screeningId, seat.Id);
     }
 
-    public async Task<IReadOnlyList<int>?> CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests) => 
+    public async Task<IReadOnlyList<Reservation>?> CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests) => 
         reservationRepository.CreateReservations(reservationRequests);
 
     public async Task<IReadOnlyList<Seat>> GetAvailableSeats(int screeningId)
