@@ -32,7 +32,7 @@ public static class WebAppConfigurator
         app.MapDelete("/reservations/{reservationId}", (IBookingService bookingService, int reservationId) => 
             bookingService.CancelReservation(reservationId));
 
-        app.MapPost("/multiple-reservations/", async (IBookingService bookingService, [FromBody] MultipleReservationCreationRequest request) =>
+        app.MapPost("/multiple-reservations", async (IBookingService bookingService, [FromBody] MultipleReservationCreationRequest request) =>
         {
             var reservationRequests = request.ToDomain();
             var reservations = await bookingService.CreateReservations(reservationRequests);

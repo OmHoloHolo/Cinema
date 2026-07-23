@@ -6,24 +6,15 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Booking.Domain.Abstractions;
 using Booking.Domain.Models;
-using Microsoft.Extensions.Configuration;
 using Shared.Communication.Dtos;
 
 namespace Booking.Infrastructure.Communication;
 
-public class ShowClient : IShowProvider
+public class ShowClient(HttpClient httpClient) : IShowProvider
 {
-    private readonly HttpClient _httpClient;
-
-    public ShowClient(IHttpClientFactory httpClientFactory, IConfiguration configuration)
-    {
-        _httpClient = httpClientFactory.CreateClient();
-        _httpClient.BaseAddress = new Uri(configuration.GetRequiredSection("ShowApi:BaseUrl").Get<string>()!);
-    }
-
     public async Task<IReadOnlyList<Seat>> GetSeats(int roomId)
     {
-        var response = await _httpClient.GetAsync($"/rooms/{roomId}/seat");
+        var response = await httpClient.GetAsync($"/rooms/{roomId}/seats");
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadFromJsonAsync<SeatDto>();
         
