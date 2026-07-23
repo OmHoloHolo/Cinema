@@ -3,8 +3,7 @@ using System.Collections.Generic;
 
 namespace Show.Domain.Abstractions;
 
-public interface IScreeningService
+public interface IScreeningRepository
 {
     IReadOnlyList<Screening> GetScreenings();
-    IReadOnlyList<Seat> GetSeats(int roomId);
 }
