@@ -18,26 +18,35 @@ public class BookingService(IReservationRepository reservationRepository, IShowP
     public async Task<int?> CreateReservation(int screeningId)
     {
         var allSeats = await showProvider.GetSeats(screeningId);
-        var reservedSeats = reservationRepository.GetReservedSeats(screeningId);
-        var seat = GetRandomAvailableSeat(allSeats, reservedSeats);
+        var reservedSeatIds = reservationRepository
+            .GetReservations(screeningId)
+            .Select(r => r.SeatId)
+            .ToList();
+        var seat = GetRandomAvailableSeat(allSeats, reservedSeatIds);
         return seat is null 
             ? null
             : reservationRepository.CreateReservation(screeningId, seat.Id);
     }
 
+    public async Task<IReadOnlyList<int>?> CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests) => 
+        reservationRepository.CreateReservations(reservationRequests);
+
     public async Task<IReadOnlyList<Seat>> GetAvailableSeats(int screeningId)
     {
         var allSeats = await showProvider.GetSeats(screeningId);
-        var reservedSeats = reservationRepository.GetReservedSeats(screeningId);
-        return GetAvailableSeats(allSeats, reservedSeats);
+        var reservedSeatIds = reservationRepository
+            .GetReservations(screeningId)
+            .Select(r => r.SeatId)
+            .ToList();
+        return GetAvailableSeats(allSeats, reservedSeatIds);
     }
 
-    private static IReadOnlyList<Seat> GetAvailableSeats(IReadOnlyList<Seat> allSeats, IReadOnlyList<Seat> reservedSeats) =>
-        allSeats.Except(reservedSeats).ToList();
+    private static IReadOnlyList<Seat> GetAvailableSeats(IReadOnlyList<Seat> allSeats, IReadOnlyList<int> reservedSeatIds) =>
+        allSeats.ExceptBy(reservedSeatIds, seat => seat.Id).ToList();
 
-    private static Seat? GetRandomAvailableSeat(IReadOnlyList<Seat> allSeats, IReadOnlyList<Seat> reservedSeats)
+    private static Seat? GetRandomAvailableSeat(IReadOnlyList<Seat> allSeats, IReadOnlyList<int> reservedSeatIds)
     {
-        var availableSeats = GetAvailableSeats(allSeats, reservedSeats);
+        var availableSeats = GetAvailableSeats(allSeats, reservedSeatIds);
         if (availableSeats.Count == 0)        
             return null;
 
