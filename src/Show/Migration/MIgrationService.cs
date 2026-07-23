@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Show.Infrastructure.Persistence;
 using Show.Infrastructure.Persistence.Models;
 
-namespace Show.Infrastructure.Persistence.Migrations;
+namespace Show.Migration;
 
 public class MigrationService(ShowDbContext dbContext)
 {

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Show.Api.Configurations;
 using Show.Domain;
 using Show.Infrastructure;
-using Show.Infrastructure.Persistence.Migrations;
+using Show.Migration;
 
 var builder = WebApplication.CreateBuilder(args);
 var port = builder.Configuration.GetRequiredSection("Port").Get<int>();
@@ -15,7 +15,8 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
     .AddInfrastructureServices(builder.Configuration)
-    .AddDomainServices();
+    .AddDomainServices()
+    .AddMigrationServices();
 
 var app = builder.Build();
 
