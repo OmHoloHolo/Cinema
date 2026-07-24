@@ -6,5 +6,5 @@ namespace Booking.Domain.Abstractions;
 
 public interface IShowProvider
 {
-    Task<IReadOnlyList<Seat>> GetSeats(int roomId);
+    Task<IReadOnlyList<Seat>> GetSeats(int screeningId);
 }

@@ -13,7 +13,6 @@ public static class DependencyInjection
     {
         services.AddDbContext<ShowDbContext>(options => options.UseSqlite(configuration.GetConnectionString("ShowDb")));
         services.AddScoped<IScreeningRepository, ScreeningRepository>();
-        services.AddScoped<ISeatRepository, SeatRepository>();
 
         return services;
     }

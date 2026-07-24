@@ -20,4 +20,11 @@ public class ScreeningRepository(ShowDbContext showDbContext) : IScreeningReposi
                         .ToList()),
                 StartTime: screening.StartTime))
             .ToList();
+            
+    public IReadOnlyList<Seat> GetSeats(int screeningId) => 
+        showDbContext.Screenings
+            .Where(screening => screening.Id == screeningId)        
+            .Join(showDbContext.Seats, screeningId => screeningId.RoomId, seat => seat.RoomId, (_, seat) => seat)
+            .Select(seat => new Seat(Id: seat.Id, Row: seat.Row, Number: seat.Number))
+            .ToList();
 }

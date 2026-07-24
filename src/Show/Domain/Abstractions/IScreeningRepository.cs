@@ -6,4 +6,5 @@ namespace Show.Domain.Abstractions;
 public interface IScreeningRepository
 {
     IReadOnlyList<Screening> GetScreenings();
+    IReadOnlyList<Seat> GetSeats(int screeningId);
 }
