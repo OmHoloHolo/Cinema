@@ -26,21 +26,23 @@ public static class WebAppConfigurator
                 var reservation = await reservationService.CreateReservation(request.ScreeningId, request.SeatId);
                 return reservation is null
                     ? ReservationError
-                    : Results.Ok(reservation.Id);
+                    : Results.Created(string.Empty, reservation.ToResponse());
             });
 
         app.MapDelete("/reservations/{reservationId}", (IReservationService bookingService, int reservationId) =>
-            bookingService.CancelReservation(reservationId));
+            bookingService.CancelReservation(reservationId)
+                ? Results.NoContent()
+                : Results.NotFound());
 
         app.MapPost(
-            "/multiple-reservations", 
+            "/multiple-reservations",
             async (IReservationService reservationService, [FromBody] MultipleReservationCreationRequest request) =>
             {
                 var reservationRequests = request.ToDomain();
                 var reservations = await reservationService.CreateReservations(reservationRequests);
                 return reservations is null
                     ? ReservationError
-                    : Results.Ok(reservations.ToResponse());
+                    : Results.Created(string.Empty, reservations.ToResponse());
             });
     }
 }
