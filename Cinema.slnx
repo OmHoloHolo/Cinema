@@ -3,4 +3,5 @@
   <Project Path="./src/Show/Show.csproj" />
   <Project Path="./src/Shared/Shared.csproj" />
   <Project Path="./tests/Booking.UnitTests/Booking.UnitTests.csproj" />
+  <Project Path="./tests/Show.UnitTests/Show.UnitTests.csproj" />
 </Solution>

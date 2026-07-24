@@ -102,7 +102,7 @@ public class SeatServiceTests
         };
         _showProvider.GetSeats(Arg.Is(screeningId)).Returns(seats);
         _reservationRepository.GetReservations(Arg.Is(screeningId)).Returns(reservations);
-        _randomProvider.Next(Arg.Any<int>(), Arg.Any<int>()).Returns(3);
+        _randomProvider.Next(Arg.Any<int>(), Arg.Any<int>()).Returns(1);
         
         var actual = await _seatService.GetRandomAvailableSeat(screeningId);
 
