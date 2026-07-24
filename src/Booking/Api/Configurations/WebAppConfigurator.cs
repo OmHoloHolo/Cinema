@@ -11,7 +11,7 @@ public static class WebAppConfigurator
 {
     private static readonly IResult ReservationError = Results.Problem(
         title: "Reservation creation in conflict",
-        detail: "The chosen seats have already been reserved.",
+        detail: "Cannot create the reservation.",
         statusCode: StatusCodes.Status409Conflict);
 
     public static void ConfigureRoutes(this WebApplication app)

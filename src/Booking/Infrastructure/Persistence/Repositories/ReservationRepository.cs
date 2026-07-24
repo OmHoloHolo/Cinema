@@ -36,7 +36,8 @@ public class ReservationRepository(BookingDbContext dbContext) : IReservationRep
     public IReadOnlyList<Reservation>? CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests)
     {
         var reservationEntities = reservationRequests
-            .Select(reservationRequest => new ReservationEntity(ScreeningId: reservationRequest.ScreeningId, SeatId: reservationRequest.SeatId));
+            .Select(reservationRequest => new ReservationEntity(ScreeningId: reservationRequest.ScreeningId, SeatId: reservationRequest.SeatId))
+            .ToList();
         dbContext.Reservations.AddRange(reservationEntities);
         try
         {

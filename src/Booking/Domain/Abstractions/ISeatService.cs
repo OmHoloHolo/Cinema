@@ -7,5 +7,4 @@ namespace Booking.Domain.Abstractions;
 public interface ISeatService
 {
     Task<IReadOnlyList<Seat>> GetAvailableSeats(int screeningId);
-    Task<Seat?> GetRandomAvailableSeat(int screeningId);
 }
