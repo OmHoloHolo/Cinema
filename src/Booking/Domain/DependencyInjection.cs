@@ -8,7 +8,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddDomainServices(this IServiceCollection services)
     {
-        services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<IReservationService, ReservationService>();
+        services.AddScoped<ISeatService, SeatService>();
 
         return services;
     }

@@ -4,11 +4,9 @@ using System.Threading.Tasks;
 
 namespace Booking.Domain.Abstractions;
 
-public interface IBookingService
+public interface IReservationService
 {
-    Task<IReadOnlyList<Seat>> GetAvailableSeats(int screeningId);
-    Reservation? CreateReservation(int screeningId, int seatId);
-    Task<Reservation?> CreateReservation(int screeningId);
+    Task<Reservation?> CreateReservation(int screeningId, int? seatId);
     Task<IReadOnlyList<Reservation>?> CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests);
     bool CancelReservation(int reservationId);
 }
