@@ -10,6 +10,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IReservationService, ReservationService>();
         services.AddScoped<ISeatService, SeatService>();
+        services.AddSingleton<IRandomProvider, RandomProvider>();
 
         return services;
     }

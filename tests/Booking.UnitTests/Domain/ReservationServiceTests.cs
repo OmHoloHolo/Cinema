@@ -5,7 +5,7 @@ using Booking.Domain.Models;
 using Booking.Domain.Services;
 using NSubstitute;
 
-namespace Booking.UnitTests;
+namespace Booking.UnitTests.Domain;
 
 public class ReservationServiceTests
 {

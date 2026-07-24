@@ -7,7 +7,7 @@ using Booking.Domain.Models;
 
 namespace Booking.Domain.Services;
 
-public class SeatService(IShowProvider showProvider, IReservationRepository reservationRepository) : ISeatService
+public class SeatService(IShowProvider showProvider, IReservationRepository reservationRepository, IRandomProvider randomProvider) : ISeatService
 {
     public async Task<IReadOnlyList<Seat>> GetAvailableSeats(int screeningId)
     {
@@ -24,9 +24,8 @@ public class SeatService(IShowProvider showProvider, IReservationRepository rese
         var availableSeats = await GetAvailableSeats(screeningId);
         if (availableSeats.Count == 0)        
             return null;
-
-        var random = new Random();
-        var randomIndex = random.Next(availableSeats.Count);
+        
+        var randomIndex = randomProvider.Next(0, availableSeats.Count);
         return availableSeats[randomIndex];
     }
 }

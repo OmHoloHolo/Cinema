@@ -12,9 +12,9 @@ namespace Booking.Infrastructure.Communication;
 
 public class ShowClient(HttpClient httpClient) : IShowProvider
 {
-    public async Task<IReadOnlyList<Seat>> GetSeats(int roomId)
+    public async Task<IReadOnlyList<Seat>> GetSeats(int screeningId)
     {
-        var response = await httpClient.GetAsync($"/rooms/{roomId}/seats");
+        var response = await httpClient.GetAsync($"/screenings/{screeningId}/seats");
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadFromJsonAsync<SeatDto>();
         

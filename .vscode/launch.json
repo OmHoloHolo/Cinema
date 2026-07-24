@@ -6,6 +6,18 @@
       "type": "dotnet",
       "request": "launch",
       "projectPath": "${workspaceFolder}/src/Show/Show.csproj"
+    },
+    {
+      "name": "Booking",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/src/Booking/Booking.csproj"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "All Services",
+      "configurations": ["Show", "Booking"]
     }
   ]
 }
