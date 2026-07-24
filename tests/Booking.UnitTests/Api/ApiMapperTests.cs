@@ -24,11 +24,30 @@ public class ApiMapperTests
     public void ToResponse_Reservation()
     {
         var reservationId = 1;
-        var reservations = new Reservation[] { new(Id: reservationId, ScreeningId: 2, SeatId: 3) };
+        var screeningId = 2;
+        var seatId = 3;
+        var reservation = new Reservation(Id: reservationId, ScreeningId: screeningId, SeatId: seatId);
+
+        var response = reservation.ToResponse();
+
+        var expected = new ReservationResponse(Id: reservationId, ScreeningId: screeningId, SeatId: seatId);
+        Assert.Equivalent(expected, response);
+    }
+
+    [Fact]
+    public void ToResponse_MultipleReservations()
+    {
+        var reservationId = 1;
+        var screeningId = 2;
+        var seatId = 3;
+        var reservations = new Reservation[] { new(Id: reservationId, ScreeningId: screeningId, SeatId: seatId) };
 
         var response = reservations.ToResponse();
 
-        var expected = new MultipleReservationsResponse(Reservations: [new(Id: reservationId)]);
+        var expected = new MultipleReservationsResponse(Reservations: 
+        [
+            new(Id: reservationId, ScreeningId: screeningId, SeatId: seatId)
+        ]);
         Assert.Equivalent(expected, response);
     }
 
