@@ -66,7 +66,7 @@ public class ReservationRepositoryTests
 
         var screeningId = 1;
         var seat1Id = 1;
-        var seat2Id = 1;
+        var seat2Id = 2;
         var reservationRequests = new ReservationRequest[]
         {
             new (ScreeningId: 1, SeatId: 1),
