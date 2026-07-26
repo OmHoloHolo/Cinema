@@ -17,7 +17,9 @@ public static class WebAppConfigurator
 {
     public static void ConfigureRoutes(this WebApplication app, ILogger logger)
     {
-        app.MapGet("/auth/token", () => Results.Ok(new TokenResponse(AuthenticationUtils.GenerateToken(app.Configuration))));
+        app.MapGet("/auth/token", () => Results.Ok(new TokenResponse(AuthenticationUtils.GenerateToken(app.Configuration))))
+            .WithSummary("Get authentication token")
+            .WithDescription("Get the authentication token to paste in the Authorize section above");
 
         app.MapGet(
             "/screenings/{screeningId}/available-seats", 
@@ -27,7 +29,21 @@ public static class WebAppConfigurator
                     var availableSeats = await handler.Handle(screeningId);
                     return Results.Ok(availableSeats.ToResponse());
                 }))
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .WithSummary("Get available seats")
+            .WithDescription("Get all available seats of a screening");
+
+        app.MapGet(
+            "/screenings/{screeningId}/reservations", 
+            (IGetReservationsHandler handler, int screeningId) => 
+                HandleException(logger, async () =>
+                {
+                    var reservations = await handler.Handle(screeningId);
+                    return Results.Ok(reservations.ToResponse());
+                }))
+            .RequireAuthorization()
+            .WithSummary("Get reservations")
+            .WithDescription("Get all existing reservations of a screening");
 
         app.MapPost(
             "screenings/{screeningId}/reservations",
@@ -37,7 +53,9 @@ public static class WebAppConfigurator
                     var reservation = await handler.Handle(screeningId, request.SeatId);
                     return Results.Created(string.Empty, reservation.ToResponse());
                 }))
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .WithSummary("Create reservation")
+            .WithDescription("Create the reservation of a screening with the seat requested, if specified, otherwise create the reservation for any available seat");
 
         app.MapDelete(
             "screenings/{screeningId}/reservations/{reservationId}", 
@@ -47,7 +65,9 @@ public static class WebAppConfigurator
                     await handler.Handle(screeningId, reservationId);
                     return Results.NoContent();
                 })
-            ).RequireAuthorization();
+            ).RequireAuthorization()
+            .WithSummary("Cancel reservation")
+            .WithDescription("Cancel the reservation of a screening");
 
         app.MapPost(
             "/multiple-reservations",
@@ -58,7 +78,9 @@ public static class WebAppConfigurator
                     var reservations = await handler.Handle(reservationRequests);
                     return Results.Created(string.Empty, reservations.ToResponse());
                 }))
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .WithSummary("Create multiple reservations")
+            .WithDescription("Create multiple reservations with the possibility to choose different screenings in one request");
     }
 
     private static async Task<IResult> HandleException(ILogger logger, Func<Task<IResult>> process)

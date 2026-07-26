@@ -6,5 +6,5 @@ namespace Show.Domain.Abstractions;
 public interface IShowService
 {
     IReadOnlyList<Screening> GetScreenings();
-    IReadOnlyList<Seat> GetSeats(int roomId);
+    IReadOnlyList<Seat> GetSeats(int screeningId);
 }
