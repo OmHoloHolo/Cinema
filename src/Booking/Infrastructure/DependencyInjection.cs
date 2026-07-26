@@ -16,10 +16,14 @@ public static class DependencyInjection
     {
         services.AddDbContext<BookingDbContext>(options => options.UseSqlite(configuration.GetConnectionString("BookingDb")));
         services.AddScoped<IReservationRepository, ReservationRepository>();
-        services.AddHttpClient<IShowGateway, ShowClient>(httpClient =>
+        services.AddHttpClient<AuthenticationHandler>(httpClient =>
         {
             httpClient.BaseAddress = new Uri(configuration.GetRequiredSection("ShowApi:BaseUrl").Get<string>()!);
         });
+        services.AddHttpClient<IShowGateway, ShowClient>(httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(configuration.GetRequiredSection("ShowApi:BaseUrl").Get<string>()!);
+        }).AddHttpMessageHandler<AuthenticationHandler>();
 
         return services;
     }

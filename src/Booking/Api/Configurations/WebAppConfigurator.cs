@@ -1,13 +1,15 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Booking.Api.Mappers;
-using Booking.Api.Requests;
-using Booking.Application.Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Shared.Api;
+using Shared.Api.Models;
+using Booking.Api.Mappers;
+using Booking.Api.Requests;
+using Booking.Application.Handlers;
 
 namespace Booking.Api.Configurations;
 
@@ -15,6 +17,8 @@ public static class WebAppConfigurator
 {
     public static void ConfigureRoutes(this WebApplication app, ILogger logger)
     {
+        app.MapGet("/auth/token", () => Results.Ok(new TokenResponse(AuthenticationUtils.GenerateToken(app.Configuration))));
+
         app.MapGet(
             "/screenings/{screeningId}/available-seats", 
             (IGetAvailableSeatsHandler handler, int screeningId) => 
@@ -22,7 +26,8 @@ public static class WebAppConfigurator
                 {
                     var availableSeats = await handler.Handle(screeningId);
                     return Results.Ok(availableSeats.ToResponse());
-                }));
+                }))
+            .RequireAuthorization();
 
         app.MapPost(
             "screenings/{screeningId}/reservations",
@@ -31,7 +36,8 @@ public static class WebAppConfigurator
                 {
                     var reservation = await handler.Handle(screeningId, request.SeatId);
                     return Results.Created(string.Empty, reservation.ToResponse());
-                }));
+                }))
+            .RequireAuthorization();
 
         app.MapDelete(
             "screenings/{screeningId}/reservations/{reservationId}", 
@@ -40,8 +46,8 @@ public static class WebAppConfigurator
                 {
                     await handler.Handle(screeningId, reservationId);
                     return Results.NoContent();
-                }));
-
+                })
+            ).RequireAuthorization();
 
         app.MapPost(
             "/multiple-reservations",
@@ -51,7 +57,8 @@ public static class WebAppConfigurator
                     var reservationRequests = request.ToDomain();
                     var reservations = await handler.Handle(reservationRequests);
                     return Results.Created(string.Empty, reservations.ToResponse());
-                }));
+                }))
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> HandleException(ILogger logger, Func<Task<IResult>> process)
