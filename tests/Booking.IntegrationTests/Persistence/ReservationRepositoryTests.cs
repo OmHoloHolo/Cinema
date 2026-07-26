@@ -116,9 +116,9 @@ public class ReservationRepositoryTests
             new (ScreeningId: 1, SeatId: 2),
         };
 
-        var actual = reservationRepository.SaveReservations(reservationRequests);
+        var actual = () => reservationRepository.SaveReservations(reservationRequests);
 
-        Assert.Null(actual);
+        Assert.Throws<InvalidOperationException>(actual);
     }
 
     [Fact]

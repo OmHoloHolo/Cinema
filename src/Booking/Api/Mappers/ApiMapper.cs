@@ -16,9 +16,9 @@ public static class ApiMapper
                 SeatId: reservation.SeatId))
             .ToList();
 
-    public static MultipleReservationsResponse ToResponse(this IEnumerable<Reservation.Existing> existingReservations) => new(
+    public static ReservationsResponse ToResponse(this IEnumerable<Reservation.Existing> existingReservations) => new(
         Reservations: existingReservations
-            .Select(existingReservation => new MultipleReservationsResponse.Reservation(
+            .Select(existingReservation => new ReservationsResponse.Reservation(
                 Id: existingReservation.Id,
                 ScreeningId: existingReservation.ScreeningId,
                 SeatId: existingReservation.SeatId))
@@ -31,9 +31,4 @@ public static class ApiMapper
                 Row: seat.Row,
                 Number: seat.Number))
             .ToList());
-
-    public static ReservationResponse ToResponse(this Reservation.Existing existingReservation) => new(
-        Id: existingReservation.Id,
-        ScreeningId: existingReservation.ScreeningId,
-        SeatId: existingReservation.SeatId);
 }

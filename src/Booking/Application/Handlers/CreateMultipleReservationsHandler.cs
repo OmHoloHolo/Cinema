@@ -8,7 +8,7 @@ using Booking.Domain.Models;
 
 namespace Booking.Application.Handlers;
 
-public class CreateReservationsHandler(IReservationService reservationService, IReservationRepository reservationRepository)
+public class CreateMultipleReservationsHandler(IReservationService reservationService, IReservationRepository reservationRepository) : ICreateMultipleReservationsHandler
 {
     public async Task<IReadOnlyList<Reservation.Existing>> Handle(IReadOnlyList<ReservationRequest> reservationRequests)
     {

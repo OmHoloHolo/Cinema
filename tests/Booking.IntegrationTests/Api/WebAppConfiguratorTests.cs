@@ -25,7 +25,7 @@ namespace Booking.IntegrationTests.Api;
 public class WebAppConfiguratorTests
 {
     private readonly ICreateReservationHandler _createReservationHandler;
-    private readonly ICreateReservationsHandler _createReservationsHandler;
+    private readonly ICreateMultipleReservationsHandler _createMultipleReservationsHandler;
     private readonly ICancelReservationHandler _cancelReservationHandler;
     private readonly IGetAvailableSeatsHandler _getAvailableSeatsHandler;
     private readonly HttpClient _httpClient;
@@ -36,11 +36,11 @@ public class WebAppConfiguratorTests
         builder.WebHost.UseTestServer();
         
         _createReservationHandler = Substitute.For<ICreateReservationHandler>();
-        _createReservationsHandler = Substitute.For<ICreateReservationsHandler>();
+        _createMultipleReservationsHandler = Substitute.For<ICreateMultipleReservationsHandler>();
         _cancelReservationHandler = Substitute.For<ICancelReservationHandler>();
         _getAvailableSeatsHandler = Substitute.For<IGetAvailableSeatsHandler>();
         builder.Services.AddSingleton(_createReservationHandler);
-        builder.Services.AddSingleton(_createReservationsHandler);
+        builder.Services.AddSingleton(_createMultipleReservationsHandler);
         builder.Services.AddSingleton(_cancelReservationHandler);
         builder.Services.AddSingleton(_getAvailableSeatsHandler);
         var app = builder.Build();
@@ -67,31 +67,34 @@ public class WebAppConfiguratorTests
     [Fact]
     public async Task WebAppRoutes_CreateReservation_WhenResourceDoesntExist()
     {
-        var reservationId = 1;
         var screeningId = 1;
         var request = new ReservationCreationRequest(SeatId: 2);
         var createdReservation = new Reservation.Existing(
-            Id: reservationId, 
+            Id: 1, 
             ScreeningId: screeningId, 
             SeatId: request.SeatId!.Value);
-        _createReservationHandler.Handle(Arg.Is(screeningId), Arg.Is(request.SeatId)).Returns(createdReservation);
+        _createReservationHandler.Handle(Arg.Is(screeningId), Arg.Is(request.SeatId)).Returns([createdReservation]);
 
         var response = await _httpClient.PostAsJsonAsync($"screenings/{screeningId}/reservations", request);
-        var actual = await response.Content.ReadFromJsonAsync<ReservationResponse>();
+        var actual = await response.Content.ReadFromJsonAsync<ReservationsResponse>();
 
-        var expected = new ReservationResponse(
-            Id: createdReservation.Id,
-            ScreeningId: createdReservation.ScreeningId,
-            SeatId: createdReservation.SeatId);
+        var expected = new ReservationsResponse(
+            Reservations: 
+            [
+                new ReservationsResponse.Reservation(
+                    Id: createdReservation.Id,
+                    ScreeningId: createdReservation.ScreeningId,
+                    SeatId: createdReservation.SeatId)
+            ]);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        Assert.Equal(expected: expected, actual);
+        Assert.Equivalent(expected: expected, actual);
     }
 
     [Fact]
     public async Task WebAppRoutes_CreateReservation_WhenResourceExists()
     {
         var request = new ReservationCreationRequest(SeatId: 2);
-        _cancelReservationHandler
+        _createReservationHandler
             .Handle(Arg.Any<int>(), Arg.Any<int>())
             .ThrowsAsync<InvalidDataException>();
 
@@ -136,12 +139,12 @@ public class WebAppConfiguratorTests
             new(Id: 1, ScreeningId: 1, SeatId: 2),
             new(Id: 2, ScreeningId: 1, SeatId: 3)
         };
-        _createReservationsHandler.Handle(Arg.Any<IReadOnlyList<ReservationRequest>>()).Returns(createdReservations);
+        _createMultipleReservationsHandler.Handle(Arg.Any<IReadOnlyList<ReservationRequest>>()).Returns(createdReservations);
 
         var response = await _httpClient.PostAsJsonAsync("/multiple-reservations", request);
-        var actual = await response.Content.ReadFromJsonAsync<MultipleReservationsResponse>();
+        var actual = await response.Content.ReadFromJsonAsync<ReservationsResponse>();
 
-        var expected = new MultipleReservationsResponse(Reservations: 
+        var expected = new ReservationsResponse(Reservations: 
         [
             new(Id: 1, ScreeningId: 1, SeatId: 2),
             new(Id: 2, ScreeningId: 1, SeatId: 3)
@@ -154,7 +157,7 @@ public class WebAppConfiguratorTests
     public async Task WebAppRoutes_CreateMultipleReservations_WhenResourceExists()
     {
         var request = new MultipleReservationCreationRequest(Reservations: [new(ScreeningId: 1, SeatId: 2)]);
-        _createReservationsHandler
+        _createMultipleReservationsHandler
             .Handle(Arg.Any<IReadOnlyList<ReservationRequest>>())
             .ThrowsAsync<InvalidDataException>();
 

@@ -22,20 +22,6 @@ public class ApiMapperTests
     }
 
     [Fact]
-    public void ToResponse_Reservation()
-    {
-        var reservationId = 1;
-        var screeningId = 2;
-        var seatId = 3;
-        var reservation = new Reservation.Existing(Id: reservationId, ScreeningId: screeningId, SeatId: seatId);
-
-        var response = reservation.ToResponse();
-
-        var expected = new ReservationResponse(Id: reservationId, ScreeningId: screeningId, SeatId: seatId);
-        Assert.Equivalent(expected, response);
-    }
-
-    [Fact]
     public void ToResponse_MultipleReservations()
     {
         var reservationId = 1;
@@ -45,7 +31,7 @@ public class ApiMapperTests
 
         var response = reservations.ToResponse();
 
-        var expected = new MultipleReservationsResponse(Reservations: 
+        var expected = new ReservationsResponse(Reservations: 
         [
             new(Id: reservationId, ScreeningId: screeningId, SeatId: seatId)
         ]);

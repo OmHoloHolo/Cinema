@@ -44,7 +44,7 @@ public static class WebAppConfigurator
 
         app.MapPost(
             "/multiple-reservations",
-            (ICreateReservationsHandler handler, [FromBody] MultipleReservationCreationRequest request) => 
+            (ICreateMultipleReservationsHandler handler, [FromBody] MultipleReservationCreationRequest request) => 
                 HandleException(async () =>
                 {
                     var reservationRequests = request.ToDomain();
@@ -53,15 +53,15 @@ public static class WebAppConfigurator
                 }));
     }
 
-    private static Task<IResult> HandleException(Func<Task<IResult>> process)
+    private static async Task<IResult> HandleException(Func<Task<IResult>> process)
     {
         try
         {
-            return process();
+            return await process();
         }
         catch (Exception ex) when (ex is InvalidOperationException or InvalidDataException)
         {
-            return Task.FromResult(Results.Conflict(ex.Message));
+            return Results.Conflict(ex.Message);
         }
     }
 }

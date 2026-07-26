@@ -5,7 +5,7 @@ using Booking.Domain.Models;
 
 namespace Booking.Application.Handlers;
 
-public interface ICreateReservationsHandler
+public interface ICreateMultipleReservationsHandler
 {
     Task<IReadOnlyList<Reservation.Existing>> Handle(IReadOnlyList<ReservationRequest> reservationRequests);
 }

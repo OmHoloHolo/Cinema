@@ -10,7 +10,7 @@ namespace Booking.Application.Handlers;
 public class CreateReservationHandler(
     IReservationService reservationService,
     IReservationRepository reservationRepository,
-    IRandomGenerator randomGenerator)
+    IRandomGenerator randomGenerator) : ICreateReservationHandler
 {
     public async Task<IReadOnlyList<Reservation.Existing>> Handle(int requestedScreeningId, int? requestedSeatId)
     {

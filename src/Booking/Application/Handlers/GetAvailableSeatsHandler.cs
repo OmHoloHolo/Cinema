@@ -5,7 +5,7 @@ using Booking.Domain.Models;
 
 namespace Booking.Application.Handlers;
 
-public class GetAvailableSeatsHandler(IReservationService reservationService)
+public class GetAvailableSeatsHandler(IReservationService reservationService) : IGetAvailableSeatsHandler
 {
     public async Task<IReadOnlyList<Seat>> Handle(int requestedScreeningId)
     {
