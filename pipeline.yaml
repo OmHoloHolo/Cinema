@@ -1,0 +1,47 @@
+name: CICD
+on:
+ push:
+   branches:
+     - main
+ workflow_dispatch:
+   inputs:
+     service:
+       description: Select the service for which the artifacts will be produced
+       required: true
+       type: choice
+       options:
+         - Booking
+         - Show
+jobs:
+ ci:
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout repository
+       uses: actions/checkout@v4
+     - name: Setup environment
+       uses: actions/setup-dotnet@v4
+       with:
+         dotnet-version: '10.0.x'
+     - name: Build
+       run: |
+         dotnet restore
+         dotnet build Cinema.slnx \\
+           --configuration Release \
+           --no-restore
+     - name: Test
+       run: |
+         dotnet test Cinema.slnx \
+           --configuration Release \
+           --no-build
+     - name: Create artifacts
+       if: github.event_name == 'workflow_dispatch'
+       run: |
+         dotnet publish \
+           src/${{ github.event.inputs.service }}/${{ github.event.inputs.service }}.csproj \
+           --configuration Release \
+           --no-build \
+           --output publish
+         docker build \
+           -f src/${{ github.event.inputs.service }}/Dockerfile \
+           -t ${{ github.event.inputs.service }}:${{ github.sha }} \
+           .
