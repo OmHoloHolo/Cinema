@@ -3,6 +3,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -29,7 +30,13 @@ public class WebAppConfiguratorTests
         builder.WebHost.UseTestServer();
         _showService = Substitute.For<IShowService>();
         builder.Services.AddSingleton(_showService);
+        builder.Services
+            .AddAuthentication(TestAuthHandler.Scheme)
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.Scheme, _ => { });
+        builder.Services.AddAuthorization();
         var app = builder.Build();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.ConfigureRoutes();
         app.Start();
         _httpClient = app.GetTestClient();

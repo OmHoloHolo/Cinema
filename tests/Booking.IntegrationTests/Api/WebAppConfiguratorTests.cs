@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -29,6 +30,7 @@ public class WebAppConfiguratorTests
     private readonly ICreateMultipleReservationsHandler _createMultipleReservationsHandler;
     private readonly ICancelReservationHandler _cancelReservationHandler;
     private readonly IGetAvailableSeatsHandler _getAvailableSeatsHandler;
+    private readonly IGetReservationsHandler _getReservationsHandler;
     private readonly HttpClient _httpClient;
 
     public WebAppConfiguratorTests()
@@ -40,11 +42,19 @@ public class WebAppConfiguratorTests
         _createMultipleReservationsHandler = Substitute.For<ICreateMultipleReservationsHandler>();
         _cancelReservationHandler = Substitute.For<ICancelReservationHandler>();
         _getAvailableSeatsHandler = Substitute.For<IGetAvailableSeatsHandler>();
+        _getReservationsHandler = Substitute.For<IGetReservationsHandler>();
         builder.Services.AddSingleton(_createReservationHandler);
         builder.Services.AddSingleton(_createMultipleReservationsHandler);
         builder.Services.AddSingleton(_cancelReservationHandler);
         builder.Services.AddSingleton(_getAvailableSeatsHandler);
+        builder.Services.AddSingleton(_getReservationsHandler);
+        builder.Services
+            .AddAuthentication(TestAuthHandler.Scheme)
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.Scheme, _ => { });
+        builder.Services.AddAuthorization();
         var app = builder.Build();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.ConfigureRoutes(Substitute.For<ILogger>());
         app.Start();
         _httpClient = app.GetTestClient();
@@ -62,6 +72,24 @@ public class WebAppConfiguratorTests
 
         var expected = new AvailableSeatsResponse(
             Seats: [new(Id: seat.Id, Row: seat.Row, Number: seat.Number)]);
+        Assert.Equivalent(expected, actual);
+    }
+
+    [Fact]
+    public async Task WebAppRoutes_Reservations()
+    {
+        var screeningId = 1;
+        var existingReservation = new Reservation.Existing(
+            Id: 1, 
+            ScreeningId: screeningId, 
+            SeatId: 1);
+        _getReservationsHandler.Handle(Arg.Is(screeningId)).Returns([existingReservation]);
+
+        var response = await _httpClient.GetAsync($"/screenings/{screeningId}/reservations");
+        var actual = await response.Content.ReadFromJsonAsync<ReservationsResponse>();
+
+        var expected = new ReservationsResponse(
+            Reservations: [new(Id: existingReservation.Id, ScreeningId: existingReservation.ScreeningId, SeatId: existingReservation.SeatId)]);
         Assert.Equivalent(expected, actual);
     }
 

@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<ICreateMultipleReservationsHandler, CreateMultipleReservationsHandler>();
         services.AddScoped<IGetAvailableSeatsHandler, GetAvailableSeatsHandler>();
         services.AddScoped<ICancelReservationHandler, CancelReservationHandler>();
+        services.AddScoped<IGetReservationsHandler, GetReservationsHandler>();
         services.AddSingleton<IRandomGenerator, RandomGenerator>();
 
         return services;
