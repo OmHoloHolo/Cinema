@@ -60,4 +60,4 @@ dotnet test Cinema.slnx
 ## CI Pipeline
 
 The pipeline will build and test the entire solution.
-When it's been run by a user, allows you to choose which artifacts publish bewtween the two projects.
+When it's run by a user, allows you to choose which artifacts publish bewtween the two projects.
