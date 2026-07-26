@@ -6,10 +6,12 @@ using Show.Api.Configurations;
 using Show.Domain;
 using Show.Infrastructure;
 using Show.Migration;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 var port = builder.Configuration.GetRequiredSection("Port").Get<int>();
 
+builder.Logging.ClearProviders().AddConsole();
 builder.WebHost.UseSetting(WebHostDefaults.ServerUrlsKey, $"http://localhost:{port}");
 builder.Services
     .AddEndpointsApiExplorer()

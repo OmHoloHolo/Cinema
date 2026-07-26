@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Show": {
+      "commandName": "Project",
+      "workingDirectory": "$(TargetDir)",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Local"
+      }
+    }
+  }
+}

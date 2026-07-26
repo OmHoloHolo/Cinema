@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Booking.Api.Configurations;
 using Booking.Application;
 using Booking.Infrastructure;
@@ -10,6 +11,7 @@ using Booking.Migration;
 var builder = WebApplication.CreateBuilder(args);
 var port = builder.Configuration.GetRequiredSection("Port").Get<int>();
 
+builder.Logging.ClearProviders().AddConsole();
 builder.WebHost.UseSetting(WebHostDefaults.ServerUrlsKey, $"http://localhost:{port}");
 builder.Services
     .AddEndpointsApiExplorer()
@@ -25,5 +27,5 @@ scope.ServiceProvider.GetRequiredService<MigrationService>().Migrate();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.ConfigureRoutes();
+app.ConfigureRoutes(app.Services.GetRequiredService<ILogger<WebApplication>>());
 app.Run();

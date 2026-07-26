@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using Show.Infrastructure.Persistence;
 using Show.Infrastructure.Persistence.Models;
 
 namespace Show.Migration;
 
-public class MigrationService(ShowDbContext dbContext)
+public class MigrationService(ILogger<MigrationService> logger, ShowDbContext dbContext)
 {
     private static readonly IEnumerable<MovieEntity> DefaultMovies = [ new(Id: 1, Title: "Nice Movie"), new(Id: 2, Title: "Bad Movie"), new(Id: 3, Title: "Best Movie") ]; 
     private static readonly IEnumerable<RoomEntity> DefaultRooms = [ new(Id: 1, Number: 1), new(Id: 2, Number: 2), new(Id: 3, Number: 3) ]; 
@@ -39,5 +40,6 @@ public class MigrationService(ShowDbContext dbContext)
             dbContext.Screenings.AddRange(DefaultScreenings);
 
         dbContext.SaveChanges();
+        logger.LogInformation("Database migration completed successfully.");
     }
 }

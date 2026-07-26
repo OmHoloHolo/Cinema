@@ -7,17 +7,18 @@ using Booking.Application.Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Booking.Api.Configurations;
 
 public static class WebAppConfigurator
 {
-    public static void ConfigureRoutes(this WebApplication app)
+    public static void ConfigureRoutes(this WebApplication app, ILogger logger)
     {
         app.MapGet(
             "/screenings/{screeningId}/available-seats", 
             (IGetAvailableSeatsHandler handler, int screeningId) => 
-                HandleException(async () =>
+                HandleException(logger, async () =>
                 {
                     var availableSeats = await handler.Handle(screeningId);
                     return Results.Ok(availableSeats.ToResponse());
@@ -26,7 +27,7 @@ public static class WebAppConfigurator
         app.MapPost(
             "screenings/{screeningId}/reservations",
             (ICreateReservationHandler handler, int screeningId, [FromBody] ReservationCreationRequest request) =>
-                HandleException(async () =>
+                HandleException(logger, async () =>
                 {
                     var reservation = await handler.Handle(screeningId, request.SeatId);
                     return Results.Created(string.Empty, reservation.ToResponse());
@@ -35,7 +36,7 @@ public static class WebAppConfigurator
         app.MapDelete(
             "screenings/{screeningId}/reservations/{reservationId}", 
             (ICancelReservationHandler handler, int screeningId, int reservationId) =>
-                HandleException(async () =>
+                HandleException(logger, async () =>
                 {
                     await handler.Handle(screeningId, reservationId);
                     return Results.NoContent();
@@ -45,7 +46,7 @@ public static class WebAppConfigurator
         app.MapPost(
             "/multiple-reservations",
             (ICreateMultipleReservationsHandler handler, [FromBody] MultipleReservationCreationRequest request) => 
-                HandleException(async () =>
+                HandleException(logger, async () =>
                 {
                     var reservationRequests = request.ToDomain();
                     var reservations = await handler.Handle(reservationRequests);
@@ -53,7 +54,7 @@ public static class WebAppConfigurator
                 }));
     }
 
-    private static async Task<IResult> HandleException(Func<Task<IResult>> process)
+    private static async Task<IResult> HandleException(ILogger logger, Func<Task<IResult>> process)
     {
         try
         {
@@ -61,7 +62,13 @@ public static class WebAppConfigurator
         }
         catch (Exception ex) when (ex is InvalidOperationException or InvalidDataException)
         {
+            logger.LogWarning(message: $"Handled exception: {ex.Message}", exception: ex);
             return Results.Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(message: "Unhandled exception", exception: ex);
+            throw;
         }
     }
 }

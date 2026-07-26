@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Booking.Application.Handlers;
 using Booking.Application.Models;
 using Booking.Api.Configurations;
@@ -17,7 +19,6 @@ using Booking.Api.Requests;
 using Booking.Api.Responses;
 using Booking.Domain.Models;
 using System.Collections.Generic;
-using NSubstitute.ExceptionExtensions;
 using System.IO;
 
 namespace Booking.IntegrationTests.Api;
@@ -44,7 +45,7 @@ public class WebAppConfiguratorTests
         builder.Services.AddSingleton(_cancelReservationHandler);
         builder.Services.AddSingleton(_getAvailableSeatsHandler);
         var app = builder.Build();
-        app.ConfigureRoutes();
+        app.ConfigureRoutes(Substitute.For<ILogger>());
         app.Start();
         _httpClient = app.GetTestClient();
     }
