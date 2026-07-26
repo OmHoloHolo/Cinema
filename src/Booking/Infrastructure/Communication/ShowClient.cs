@@ -4,15 +4,15 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Booking.Domain.Abstractions;
-using Booking.Domain.Models;
+using Booking.Application.Gateways;
+using Booking.Application.Models;
 using Shared.Communication.Dtos;
 
 namespace Booking.Infrastructure.Communication;
 
-public class ShowClient(HttpClient httpClient) : IShowProvider
+public class ShowClient(HttpClient httpClient) : IShowGateway
 {
-    public async Task<IReadOnlyList<Seat>> GetSeats(int screeningId)
+    public async Task<IReadOnlyList<SeatSlot>> GetSeatSlots(int screeningId)
     {
         var response = await httpClient.GetAsync($"/screenings/{screeningId}/seats");
         response.EnsureSuccessStatusCode();
@@ -20,7 +20,7 @@ public class ShowClient(HttpClient httpClient) : IShowProvider
         
         return content?
             .Seats
-            .Select(seat => new Seat(seat.Id, seat.Row, seat.Number))
+            .Select(seat => new SeatSlot(seat.Id, seat.Row, seat.Number))
             .ToList() ?? throw new InvalidOperationException("Failed to retrieve seats from Show API.");
     }
 }

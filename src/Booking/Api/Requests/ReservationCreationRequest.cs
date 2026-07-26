@@ -1,3 +1,3 @@
 namespace Booking.Api.Requests;
 
-public record ReservationCreationRequest(int ScreeningId, int? SeatId);
+public record ReservationCreationRequest(int? SeatId);

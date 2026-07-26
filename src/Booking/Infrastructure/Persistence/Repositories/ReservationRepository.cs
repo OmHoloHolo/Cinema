@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Booking.Domain.Abstractions;
+using Booking.Application.Repositories;
 using Booking.Domain.Models;
 using Booking.Infrastructure.Persistence.Mappers;
 using Booking.Infrastructure.Persistence.Models;
@@ -10,54 +11,45 @@ namespace Booking.Infrastructure.Persistence.Repositories;
 
 public class ReservationRepository(BookingDbContext dbContext) : IReservationRepository
 {
-    public bool CancelReservation(int reservationId)
+    public void DeleteReservation(Reservation.Existing existingReservation)
     {
-        var deletedRow = dbContext.Reservations
-            .Where(reservation => reservation.Id == reservationId)
+        var deletedRows = dbContext.Reservations
+            .Where(r => r.Id == existingReservation.Id)
             .ExecuteDelete();
-        return deletedRow > 0;
+        if(deletedRows == 0)
+            throw new InvalidOperationException(
+                $"Reservation with Id {existingReservation.Id} not found.");
     }
+    
+    public Reservation.Existing? GetReservation(int reservationId) =>    
+        dbContext.Reservations
+            .SingleOrDefault(reservation => reservation.Id == reservationId)?
+            .ToExistingReservation();
 
-    public Reservation? CreateReservation(int screeningId, int seatId)
-    {
-        var reservationEntity = new ReservationEntity(ScreeningId: screeningId, SeatId: seatId);
-        dbContext.Reservations.Add(reservationEntity);
-        try
-        {
-            dbContext.SaveChanges();
-            return reservationEntity.ToDomain();
-        }
-        catch (DbUpdateException)
-        {
-            return null;
-        }
-    }
+    public IReadOnlyList<Reservation.Existing> GetReservations(int screeningId) =>    
+        dbContext.Reservations
+            .Where(reservation => reservation.ScreeningId == screeningId)
+            .Select(reservation => reservation.ToExistingReservation())
+            .ToList();
 
-    public IReadOnlyList<Reservation>? CreateReservations(IReadOnlyList<ReservationRequest> reservationRequests)
+    public IReadOnlyList<Reservation.Existing> SaveReservations(IReadOnlyList<Reservation.New> reservations)
     {
-        var reservationEntities = reservationRequests
-            .Select(reservationRequest => new ReservationEntity(ScreeningId: reservationRequest.ScreeningId, SeatId: reservationRequest.SeatId))
+        var reservationEntities = reservations
+            .Select(reservation => new ReservationEntity(
+                ScreeningId: reservation.ScreeningId, 
+                SeatId: reservation.SeatId))
             .ToList();
         dbContext.Reservations.AddRange(reservationEntities);
         try
         {
             dbContext.SaveChanges();
             return reservationEntities
-                .Select(reservationEntity => reservationEntity.ToDomain())
+                .Select(reservationEntity => reservationEntity.ToExistingReservation())
                 .ToList();
         }
         catch (DbUpdateException)
         {
-            return null;
+            throw new InvalidOperationException("Failed to save reservations");
         }
     }
-
-    public IReadOnlyList<Reservation> GetReservations(int screeningId) =>    
-        dbContext.Reservations
-            .Where(reservation => reservation.ScreeningId == screeningId)
-            .Select(reservation => new Reservation(
-                Id: reservation.Id,
-                ScreeningId: reservation.ScreeningId,
-                SeatId: reservation.SeatId))
-            .ToList();
 }

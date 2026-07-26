@@ -1,6 +1,9 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using Booking.Api.Mappers;
 using Booking.Api.Requests;
-using Booking.Domain.Abstractions;
+using Booking.Application.Handlers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,40 +12,56 @@ namespace Booking.Api.Configurations;
 
 public static class WebAppConfigurator
 {
-    private static readonly IResult ReservationError = Results.Problem(
-        title: "Reservation creation in conflict",
-        detail: "Cannot create the reservation.",
-        statusCode: StatusCodes.Status409Conflict);
-
     public static void ConfigureRoutes(this WebApplication app)
     {
-        app.MapGet("/screenings/{screeningId}/available-seats", async (ISeatService seatService, int screeningId) =>
-            (await seatService.GetAvailableSeats(screeningId)).ToResponse());
+        app.MapGet(
+            "/screenings/{screeningId}/available-seats", 
+            (IGetAvailableSeatsHandler handler, int screeningId) => 
+                HandleException(async () =>
+                {
+                    var availableSeats = await handler.Handle(screeningId);
+                    return Results.Ok(availableSeats.ToResponse());
+                }));
 
         app.MapPost(
-            "/reservations",
-            async (IReservationService reservationService, [FromBody] ReservationCreationRequest request) =>
-            {
-                var reservation = await reservationService.CreateReservation(request.ScreeningId, request.SeatId);
-                return reservation is null
-                    ? ReservationError
-                    : Results.Created(string.Empty, reservation.ToResponse());
-            });
+            "screenings/{screeningId}/reservations",
+            (ICreateReservationHandler handler, int screeningId, [FromBody] ReservationCreationRequest request) =>
+                HandleException(async () =>
+                {
+                    var reservation = await handler.Handle(screeningId, request.SeatId);
+                    return Results.Created(string.Empty, reservation.ToResponse());
+                }));
 
-        app.MapDelete("/reservations/{reservationId}", (IReservationService bookingService, int reservationId) =>
-            bookingService.CancelReservation(reservationId)
-                ? Results.NoContent()
-                : Results.NotFound());
+        app.MapDelete(
+            "screenings/{screeningId}/reservations/{reservationId}", 
+            (ICancelReservationHandler handler, int screeningId, int reservationId) =>
+                HandleException(async () =>
+                {
+                    await handler.Handle(screeningId, reservationId);
+                    return Results.NoContent();
+                }));
+
 
         app.MapPost(
             "/multiple-reservations",
-            async (IReservationService reservationService, [FromBody] MultipleReservationCreationRequest request) =>
-            {
-                var reservationRequests = request.ToDomain();
-                var reservations = await reservationService.CreateReservations(reservationRequests);
-                return reservations is null
-                    ? ReservationError
-                    : Results.Created(string.Empty, reservations.ToResponse());
-            });
+            (ICreateReservationsHandler handler, [FromBody] MultipleReservationCreationRequest request) => 
+                HandleException(async () =>
+                {
+                    var reservationRequests = request.ToDomain();
+                    var reservations = await handler.Handle(reservationRequests);
+                    return Results.Created(string.Empty, reservations.ToResponse());
+                }));
+    }
+
+    private static Task<IResult> HandleException(Func<Task<IResult>> process)
+    {
+        try
+        {
+            return process();
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or InvalidDataException)
+        {
+            return Task.FromResult(Results.Conflict(ex.Message));
+        }
     }
 }

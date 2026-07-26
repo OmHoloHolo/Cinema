@@ -5,8 +5,8 @@ namespace Booking.Infrastructure.Persistence.Mappers;
 
 public static class ReservationMapper
 {
-    public static Reservation ToDomain(this ReservationEntity reservationEntity) => new(
+    public static Reservation.Existing ToExistingReservation(this ReservationEntity reservationEntity) => new(
         Id: reservationEntity.Id,
         ScreeningId: reservationEntity.ScreeningId,
-        SeatId: reservationEntity.SeatId);  
+        SeatId: reservationEntity.SeatId);
 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Booking.Api.Configurations;
-using Booking.Domain;
+using Booking.Application;
 using Booking.Infrastructure;
 using Booking.Migration;
 
@@ -15,7 +15,7 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
     .AddInfrastructureServices(builder.Configuration)
-    .AddDomainServices()
+    .AddApplicationServices()
     .AddMigrationServices();
 
 var app = builder.Build();

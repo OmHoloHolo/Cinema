@@ -2,8 +2,9 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Booking.Application.Gateways;
+using Booking.Application.Repositories;
 using Booking.Infrastructure.Persistence;
-using Booking.Domain.Abstractions;
 using Booking.Infrastructure.Persistence.Repositories;
 using Booking.Infrastructure.Communication;
 
@@ -15,7 +16,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<BookingDbContext>(options => options.UseSqlite(configuration.GetConnectionString("BookingDb")));
         services.AddScoped<IReservationRepository, ReservationRepository>();
-        services.AddHttpClient<IShowProvider, ShowClient>(httpClient =>
+        services.AddHttpClient<IShowGateway, ShowClient>(httpClient =>
         {
             httpClient.BaseAddress = new Uri(configuration.GetRequiredSection("ShowApi:BaseUrl").Get<string>()!);
         });
