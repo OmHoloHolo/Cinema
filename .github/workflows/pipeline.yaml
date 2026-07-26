@@ -25,7 +25,7 @@ jobs:
      - name: Build
        run: |
          dotnet restore
-         dotnet build Cinema.slnx \\
+         dotnet build Cinema.slnx \
            --configuration Release \
            --no-restore
      - name: Test
