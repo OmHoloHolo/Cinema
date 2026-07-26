@@ -1,4 +1,4 @@
-name: CICD
+name: CI
 on:
  push:
    branches:
@@ -41,7 +41,4 @@ jobs:
            --configuration Release \
            --no-build \
            --output publish
-         docker build \
-           -f src/${{ github.event.inputs.service }}/Dockerfile \
-           -t ${{ github.event.inputs.service }}:${{ github.sha }} \
            .
