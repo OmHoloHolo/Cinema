@@ -14,9 +14,9 @@ public class ReservationMapperTests
         var seatId = 3;
         var entity = new ReservationEntity(ScreeningId: screeningId, SeatId: seatId) { Id = id };
 
-        var result = entity.ToDomain();
+        var result = entity.ToExistingReservation();
 
-        var expected = new Reservation(Id: id, ScreeningId: screeningId, SeatId: seatId);
+        var expected = new Reservation.Existing(Id: id, ScreeningId: screeningId, SeatId: seatId);
         Assert.Equal(expected, result);
     }
 }

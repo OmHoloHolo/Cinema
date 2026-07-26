@@ -1,6 +1,7 @@
 using Booking.Api.Mappers;
 using Booking.Api.Requests;
 using Booking.Api.Responses;
+using Booking.Application.Models;
 using Booking.Domain.Models;
 
 namespace Booking.UnitTests.Api;
@@ -26,7 +27,7 @@ public class ApiMapperTests
         var reservationId = 1;
         var screeningId = 2;
         var seatId = 3;
-        var reservation = new Reservation(Id: reservationId, ScreeningId: screeningId, SeatId: seatId);
+        var reservation = new Reservation.Existing(Id: reservationId, ScreeningId: screeningId, SeatId: seatId);
 
         var response = reservation.ToResponse();
 
@@ -40,7 +41,7 @@ public class ApiMapperTests
         var reservationId = 1;
         var screeningId = 2;
         var seatId = 3;
-        var reservations = new Reservation[] { new(Id: reservationId, ScreeningId: screeningId, SeatId: seatId) };
+        var reservations = new Reservation.Existing[] { new(Id: reservationId, ScreeningId: screeningId, SeatId: seatId) };
 
         var response = reservations.ToResponse();
 
@@ -57,7 +58,7 @@ public class ApiMapperTests
         var id = 1;
         var row = "A";
         var number = 1;
-        var seats = new Seat[] { new(Id: id, Row: row, Number: number) };
+        var seats = new Seat[] { new(Id: id, Row: row, Number: number, Reservation: null) };
 
         var response = seats.ToResponse();
 

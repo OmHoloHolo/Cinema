@@ -4,26 +4,44 @@ using Booking.Domain.Models;
 using Booking.Infrastructure.Persistence;
 using Booking.Infrastructure.Persistence.Models;
 using Booking.Infrastructure.Persistence.Repositories;
+using System.Linq;
+using System.IO;
+using System;
 
 namespace Booking.IntegrationTests.Persistence;
 
 public class ReservationRepositoryTests
 {
-    [Theory]
-    [InlineData(1, true)]
-    [InlineData(2, false)]
-    public void CancelReservation(int reservationId, bool expected)
+    [Fact]
+    public void CancelReservation()
     {
         var dbContext = CreateDbContext();        
         var reservationRepository = new ReservationRepository(dbContext);
 
+        var existingReservation = new Reservation.Existing(Id: 1, ScreeningId: 1, SeatId: 1);        
         var reservationEntity = new ReservationEntity(ScreeningId: 1, SeatId: 1) { Id = 1 };        
         dbContext.Reservations.Add(reservationEntity);
         dbContext.SaveChanges();
 
-        var actual = reservationRepository.CancelReservation(reservationId: reservationId);
+        reservationRepository.DeleteReservation(existingReservation);
 
-        Assert.Equal(expected: expected, actual);
+        Assert.Empty(dbContext.Reservations.ToList());
+    }
+
+    [Fact]
+    public void CancelReservation_NotExistingReservation()
+    {
+        var dbContext = CreateDbContext();        
+        var reservationRepository = new ReservationRepository(dbContext);
+
+        var existingReservation = new Reservation.Existing(Id: 1, ScreeningId: 1, SeatId: 1);          
+        var reservationEntity = new ReservationEntity(ScreeningId: 1, SeatId: 1) { Id = 2 };        
+        dbContext.Reservations.Add(reservationEntity);
+        dbContext.SaveChanges();
+
+        var actual = () => reservationRepository.DeleteReservation(existingReservation);
+
+        Assert.Throws<InvalidOperationException>(actual);
     }
 
     [Fact]
@@ -32,13 +50,12 @@ public class ReservationRepositoryTests
         var dbContext = CreateDbContext();        
         var reservationRepository = new ReservationRepository(dbContext);
 
-        var screeningId = 1;
-        var seatId = 1;
+        var newReservation = new Reservation.New(ScreeningId: 1, SeatId: 1);
 
-        var actual = reservationRepository.CreateReservation(screeningId: 1, seatId: 1);
+        var actual = reservationRepository.SaveReservations([newReservation]);
 
-        Assert.Equal(expected: screeningId, actual!.ScreeningId);
-        Assert.Equal(expected: seatId, actual!.SeatId);
+        Assert.Equal(expected: 1, actual[0].ScreeningId);
+        Assert.Equal(expected: 1, actual[0].SeatId);
     }
 
     [Fact]
@@ -49,13 +66,14 @@ public class ReservationRepositoryTests
 
         var screeningId = 1;
         var seatId = 1;
+        var newReservation = new Reservation.New(ScreeningId: screeningId, SeatId: seatId);
         var reservationEntity = new ReservationEntity(ScreeningId: screeningId, SeatId: seatId) { Id = 1 };        
         dbContext.Reservations.Add(reservationEntity);
         dbContext.SaveChanges();
 
-        var actual = reservationRepository.CreateReservation(screeningId: screeningId, seatId: seatId);
+        var actual = () => reservationRepository.SaveReservations([newReservation]);
 
-        Assert.Null(actual);
+        Assert.Throws<InvalidOperationException>(actual);
     }
 
     [Fact]
@@ -67,13 +85,13 @@ public class ReservationRepositoryTests
         var screeningId = 1;
         var seat1Id = 1;
         var seat2Id = 2;
-        var reservationRequests = new ReservationRequest[]
+        var reservationRequests = new Reservation.New[]
         {
             new (ScreeningId: 1, SeatId: 1),
             new (ScreeningId: 1, SeatId: 2),
         };
 
-        var actual = reservationRepository.CreateReservations(reservationRequests);
+        var actual = reservationRepository.SaveReservations(reservationRequests);
 
         Assert.Equal(expected: screeningId, actual![0].ScreeningId);
         Assert.Equal(expected: seat1Id, actual[0].SeatId);
@@ -92,13 +110,13 @@ public class ReservationRepositoryTests
         var reservationEntity = new ReservationEntity(ScreeningId: screeningId, SeatId: seatId) { Id = 1 };        
         dbContext.Reservations.Add(reservationEntity);
         dbContext.SaveChanges();
-        var reservationRequests = new ReservationRequest[]
+        var reservationRequests = new Reservation.New[]
         {
             new (ScreeningId: 1, SeatId: 1),
             new (ScreeningId: 1, SeatId: 2),
         };
 
-        var actual = reservationRepository.CreateReservations(reservationRequests);
+        var actual = reservationRepository.SaveReservations(reservationRequests);
 
         Assert.Null(actual);
     }
@@ -116,7 +134,7 @@ public class ReservationRepositoryTests
 
         var actual = reservationRepository.GetReservations(screeningId: 1);
 
-        var expected = new Reservation[]
+        var expected = new Reservation.Existing[]
         {
             new(Id: reservation1Entity.Id, ScreeningId: reservation1Entity.ScreeningId, SeatId: reservation1Entity.SeatId)
         };
