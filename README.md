@@ -76,7 +76,7 @@ With the obtained screeing ids you can switch to the Booking service, there you 
 | Method  |       Route                       |               Description                                                                                                                            |
 |-------- |-----------------------------------|----------------------------------------------------------------------------------------------------------------|
 | GET     | /screenings                       | Check the all the screenings in the system                                                                     |
-| GET     | screenings/{screeningId}/seats    | Check all the existing seats of a screening (used by Booing service to build the data for the available seats) |
+| GET     | /screenings/{screeningId}/seats    | Check all the existing seats of a screening (used by Booing service to build the data for the available seats) |
 
 
 # CI Pipeline
