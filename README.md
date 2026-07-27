@@ -51,21 +51,35 @@ dotnet run --project src/Booking/Booking.csproj
 
 > **Note:** Since Booking depends on Show data, Show has to be up to resolve available seats information.
 
-### Some indications to navigate the system
-
-The recommended starting point, after completing the authorization, is retrieve the list of the screenings from the Show service.
-You can use one or many screening id to perform operations on Booking service. 
-You can check the available seats, create a reservation for a specific seat, or let the system get a random seat from the available ones.
-You can delete a reservation created before and make a request for a multiple creation reservation to reserve seat from the same or different screening.
-You can always check all the reservations of a screening.
-
 ### Run tests
 
 ```bash
 dotnet test Cinema.slnx
 ```
 
-## CI Pipeline
+# API routes description
+
+The recommended starting point, after completing the authorization, is retrieving the list of the screenings from `GET /screenings` on the Show service.
+With the obtained screeing ids you can switch to the Booking service, there you can perform some operations
+
+## Booking routes
+
+| Method  |                  Route                       |               Description                                                                                                                            |
+|-------- |----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| GET     | /screenings/{screeningId}/available-seats    | Check the available seats of a screening                                                                                                             |
+| POST    | /screenings/{screeningId}/reservations       | Create a reservation specifing a seat. <br> You can omit the field seatId or set it null to let the system get a random seat from the available ones |
+| DELETE  | /screenings/{screeningId}/reservations       | Delete an existing reservation                                                                                                                       |
+| POST    | /multiple-reservations                       | Make a request for a multiple creation reservation to reserve seat from the same or different screening                                              |
+| GET     | /screenings/{screeningId}/reservations       | Check all the reservations of a screening                                                                                                            |
+
+## Show routes
+| Method  |       Route                       |               Description                                                                                                                            |
+|-------- |-----------------------------------|----------------------------------------------------------------------------------------------------------------|
+| GET     | /screenings                       | Check the all the screenings in the system                                                                     |
+| GET     | screenings/{screeningId}/seats    | Check all the existing seats of a screening (used by Booing service to build the data for the available seats) |
+
+
+# CI Pipeline
 
 The pipeline will build and test the entire solution.
 When it's run by a user, allows you to choose which artifacts publish between the two projects.
